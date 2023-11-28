@@ -1,0 +1,11 @@
+.loginBox {
+  background-color: #ccf;
+  width: fit-content;
+  margin: auto;
+  padding: 2vmax;
+  text-align: center;
+}
+
+.loginBox input {
+  margin: 5% auto;
+}

@@ -1,0 +1,34 @@
+.ticket {
+  background-color: #ffe;
+  border: 1px solid black;
+  margin: 1%;
+  padding: 1em;
+  width: fit-content;
+}
+
+.ticketContainer {
+  display: none;
+  background-color: #ffe;
+  border: 1px solid #333;
+  margin: 1%;
+  padding: 2em;
+  max-width: fit-content;
+  width: 50vh;
+}
+
+.titulo {
+  background-color: #fec;
+}
+
+.texto {
+  font-style: italic;
+}
+
+.valoracion {
+  background-color: #efc;
+}
+.respuesta {
+  text-decoration: underline 1px solid;
+  width: 100%;
+  text-align: center;
+}

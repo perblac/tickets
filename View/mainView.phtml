@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickets</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="ticketContainer"></div>
+    <br>
+    <a href="index.php?c=user&logout=1">logout</a>
+    <?php
+    // var_dump($_POST);
+    echo '<p>Bienvenido! ' . $_SESSION['user']->getName() . '</p><br>';
+    if ($_SESSION['user']->getRol() == 1) {
+        /* ------------------------------ vista clente ------------------------------ */
+        //imprimir tickets
+        echo ViewRepository::printUserTickets($_SESSION['user']);
+
+        //si valorar
+        if (isset($_GET['rate'])) {
+            echo '<form action="index.php?c=ticket" method="POST">';
+            echo '<label for="rating">Valore la atención del 1 al 5</label>';
+            echo '<input type="number" id="rating" name="rating" min="1" max="5" value="3">';
+            echo '<input type="submit" name="rate" value="Valorar">';
+            echo '<input type="hidden" name="id" value="' . $_GET['rate'] . '">';
+            echo '</form>';
+        }
+        // si responder
+        if (isset($_GET['answer'])) {
+            echo '<form action="index.php?c=ticket" method="POST">';
+            echo '<label for="text">';
+            echo '<textarea name="text" cols="40" rows="5" placeholder="Respuesta" required></textarea>';
+            echo '</label>';
+            echo '<input type="submit" name="answer" value="Responder">';
+            echo '<input type="hidden" name="id" value="' . $_GET['answer'] . '">';
+            echo '</form>';
+        } else {
+            //nuevo ticket
+    ?>
+            <form action="index.php?c=ticket" method="POST">
+                <label for="title">
+                    <input type="text" id="title" name="title" placeholder="Asunto de la incidencia" required>
+                </label>
+                <br>
+                <label for="text">
+                    <textarea name="text" cols="40" rows="5" placeholder="Incidencia" required></textarea>
+                </label>
+                <br>
+                <input type="submit" id="newTicket" name="newTicket" value="Enviar nuevo ticket">
+            </form>
+        <?php
+        }
+    }
+    if ($_SESSION['user']->getRol() == 2) {
+        /* ---------------------------- vista trabajador ---------------------------- */
+        // imprimir tickets abiertos
+        echo ViewRepository::printMyTickets();
+        // imprimir tickets propios
+        echo ViewRepository::printOpenTickets();
+
+        // si responder
+        if (isset($_GET['answer'])) {
+            echo '<form action="index.php?c=ticket" method="POST">';
+            echo '<label for="text">';
+            echo '<textarea name="text" cols="40" rows="5" placeholder="Respuesta" required></textarea>';
+            echo '</label>';
+            echo '<input type="submit" name="answer" value="Responder">';
+            echo '<input type="hidden" name="id" value="' . $_GET['answer'] . '">';
+            echo '</form>';
+        }
+    }
+    if ($_SESSION['user']->getRol() == 3) {
+        /* ------------------------------- vista admin ------------------------------ */
+        //imprimir tickets
+        $tickets = TicketRepository::getAllTickets();
+        foreach ($tickets as $ticket) {
+            echo '<div class="ticket">';
+            echo ViewRepository::printTicket($ticket);
+            echo '</div>';
+        };
+        //lista usuarios para cambiar rol
+        $users = UserRepository::getUsersExceptMe();
+        foreach ($users as $user) {
+            echo 'Usuario: ' . $user->getName() . ' - Rol actual:' . $user->getRol();
+        ?>
+            <form action="index.php?c=admin&adminUsers=1" method="POST" style="display:inline">
+                <select name="newRol">
+                    <option value=1 <?php echo ($user->getRol() == 1) ? 'SELECTED' : '' ?>>Cliente</option>
+                    <option value=2 <?php echo ($user->getRol() == 2) ? 'SELECTED' : '' ?>>Trabajador</option>
+                    <option value=3 <?php echo ($user->getRol() == 3) ? 'SELECTED' : '' ?>>Administrador</option>
+                </select>
+                <input type="hidden" name="idUser" <?php echo 'value="' . $user->getId() . '"'; ?>>
+                <input type="submit" value="Cambiar" />
+            </form><br>
+    <?php
+        }
+    }
+    ?>
+    <!-- <script type="module" src="ticketApiHandler.js"></script> -->
+    <script>
+        const container = document.querySelector('.ticketContainer');
+        container.addEventListener('click', clearContainer);
+
+        function clearContainer() {
+            container.style.display = 'none';
+            container.innerHTML = '';
+        }
+
+        function readTicket(id) {
+            fetch('index.php?c=api&id=' + id)
+                .then((response) => response.json())
+                .then((data) => showDetail(data))
+                .catch((error) => console.error(error));
+            container.style.display = 'block';
+        }
+
+        function showDetail(data) {
+            let numChilds = container.childElementCount;
+            for (let i = 0; i < numChilds; i++) {
+                console.log(container.children[0]);
+                container.removeChild(container.children[0]);
+            }
+            const title = data['title'];
+            const text = data['text'];
+            const openDate = data['open_date'];
+            const closeDate = data['close_date'];
+            const rating = data['rating'];
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = 'Asunto:' + title;
+            titleElement.className = 'titulo';
+            container.appendChild(titleElement);
+            const textElement = document.createElement('p');
+            textElement.textContent = text;
+            textElement.className = 'texto';
+            container.appendChild(textElement);
+            const openElement = document.createElement('p');
+            openElement.textContent = 'Abierto en:' + openDate;
+            container.appendChild(openElement);
+            if (closeDate != null) {
+                const closeElement = document.createElement('p');
+                closeElement.textContent = 'Cerrado en:' + closeDate;
+                container.appendChild(closeElement);
+            }
+            if (rating != null) {
+                const ratingElement = document.createElement('p');
+                ratingElement.textContent = 'Valoración:' + rating;
+                ratingElement.className = 'valoracion';
+                container.appendChild(ratingElement);
+            }
+            for (let respuesta of data['respuestas']) {
+                const respuestaElement = document.createElement('p');
+                respuestaElement.className = 'respuesta';
+                respuestaElement.textContent = respuesta.autor + ': ' + respuesta.texto;
+                container.appendChild(respuestaElement);
+            }
+
+            console.log(data);
+        }
+    </script>
+</body>
+
+</html>

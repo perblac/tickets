@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styleLogin.css">
+</head>
+
+<body>
+[LoginView]
+    <br>
+    <?php
+    if (!isset($_GET['registerFrm'])) {
+        /* ---------------------------------- login --------------------------------- */
+    ?>
+        <div class="loginBox">
+            <h2>Login</h2>
+            <form action="index.php?c=user" method="POST">
+                <label for="name">
+                    <input type="text" id="name" name="name" placeholder="Nombre de usuario" required />
+                </label>
+                <br>
+                <label for="password">
+                    <input type="password" id="password" name="password" placeholder="Contraseña" required />
+                </label>
+                <br>
+                <input type="submit" name="login" value="Entrar">
+            </form>
+            <a href="index.php?registerFrm=1">registrarse</a>
+        </div>
+    <?php
+    } else {
+        /* -------------------------------- registro -------------------------------- */
+    ?>
+        <div class="loginBox">
+            <h2>Registro</h2>
+            <form action="index.php?c=user" method="POST">
+                <label for="name">
+                    <input type="text" id="name" name="name" placeholder="Nombre de usuario" required />
+                </label>
+                <br>
+                <label for="password">
+                    <input type="password" id="password" name="password" placeholder="Contraseña" required />
+                </label>
+                <br>
+                <label for="rol">
+                    <!-- <input type="number" id="rol" name="rol"> -->
+                    <select name="rol">
+                        <option value=1 >cliente</option>
+                        <option value=2 >trabajador</option>
+                        <option value=3 >admin</option>
+                    </select>
+                </label>
+                <input type="submit" name="register" value="Registrarse">
+            </form>
+        </div>
+    <?php
+    }
+    ?>
+</body>
