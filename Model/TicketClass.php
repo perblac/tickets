@@ -101,8 +101,6 @@ class Ticket
         TicketRepository::closeTicket($this);
     }
     public function getJSON() {
-        // if ($this->idAuthor != null)
-        // echo UserRepository::getUserById($this->idAuthor)->getName();
         $array['id'] = $this->id;
         $array['author'] = UserRepository::getUserById($this->idAuthor)->getName();
         $array['title'] = $this->title;
